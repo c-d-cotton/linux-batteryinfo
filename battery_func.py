@@ -42,9 +42,15 @@ def batteryinfo_multiple(batteries = None):
     batterydict = collections.OrderedDict()
     for battery in batteries:
         batterydict[battery] = {}
+
         # get energy_full and energy_now
-        with open(os.path.join('/sys/class/power_supply', battery, 'energy_full')) as f:
-            batterydict[battery]['energy_full'] = int(f.read()[: -1])
+        # for BAT1 I found that energy_full was empty so read energy_full_design if there's a problem instead
+        try:
+            with open(os.path.join('/sys/class/power_supply', battery, 'energy_full')) as f:
+                batterydict[battery]['energy_full'] = int(f.read()[: -1])
+        except Exception:
+            with open(os.path.join('/sys/class/power_supply', battery, 'energy_full_design')) as f:
+                batterydict[battery]['energy_full'] = int(f.read()[: -1])
         with open(os.path.join('/sys/class/power_supply', battery, 'energy_now')) as f:
             batterydict[battery]['energy_now'] = int(f.read()[: -1])
         with open(os.path.join('/sys/class/power_supply', battery, 'power_now')) as f:
